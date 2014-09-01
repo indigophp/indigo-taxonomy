@@ -14,7 +14,8 @@ namespace Taxonomy\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Taxonomy
+ * @ORM\Entity
+ * @ORM\Table(name="taxonomies")
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -26,8 +27,11 @@ class Taxonomy
 
 	/**
 	 * @var Taxon
+	 *
+	 * @ORM\ManyToOne(targetEntity="Taxon", cascade={"all"})
+	 * @ORM\JoinColumn(name="root_id", referencedColumnName="id", onDelete="SET NULL")
 	 */
-	private $root;
+	protected $root;
 
 	/**
 	 * Returns the root

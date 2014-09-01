@@ -11,10 +11,13 @@
 
 namespace Taxonomy\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping AS ORM;
 
 /**
- * Taxon
+ * @ORM\Entity
+ * @ORM\Table(name="taxons")
+ * @Gedmo\Tree(type="nested")
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
@@ -29,13 +32,37 @@ class Taxon
 
 	/**
 	 * @var string
+	 *
+	 * @Gedmo\Slug(handlers={
+	 *      @Gedmo\SlugHandler(class="Gedmo\Sluggable\Handler\TreeSlugHandler", options={
+	 *          @Gedmo\SlugHandlerOption(name="parentRelationField", value="parent"),
+	 *          @Gedmo\SlugHandlerOption(name="separator", value="/")
+	 *      })
+	 * }, fields={"name"}, unique=true)
+	 * @ORM\Column(type="string", unique=true)
 	 */
 	private $permalink;
 
 	/**
 	 * @var Taxonomy
+	 *
+	 * @ORM\ManyToOne(targetEntity="Taxonomy\Entity\Taxonomy")
+	 * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
 	 */
 	private $taxonomy;
+
+	/**
+	 * @ORM\ManyToOne(targetEntity="Taxonomy\Entity\Taxon", inversedBy="children")
+	 * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+	 */
+	private $parent;
+
+	/**
+	 * @ORM\OneToMany(targetEntity="Taxonomy\Entity\Taxon", mappedBy="parent", cascade={"all"})
+	 * @ORM\OrderBy({"left" = "ASC"})
+	 */
+	private $children;
+
 
 	/**
 	 * Constructor
