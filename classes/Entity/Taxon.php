@@ -28,7 +28,10 @@ class Taxon
 	use \Indigo\Doctrine\Field\Description;
 	use \Indigo\Doctrine\Behavior\SoftDelete;
 	use \Indigo\Doctrine\Behavior\Slug;
-	use \Indigo\Doctrine\Behavior\Tree;
+	use \Indigo\Doctrine\Behavior\Tree {
+		addChild as addChildOverride;
+		removeChild as removeChildOverride;
+	}
 
 	/**
 	 * @var string
@@ -52,17 +55,21 @@ class Taxon
 	private $taxonomy;
 
 	/**
+	 * @var self
+	 *
+	 * @Gedmo\TreeParent
 	 * @ORM\ManyToOne(targetEntity="Taxonomy\Entity\Taxon", inversedBy="children")
-	 * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+	 * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
 	 */
 	private $parent;
 
 	/**
+	 * @var Collection
+	 *
 	 * @ORM\OneToMany(targetEntity="Taxonomy\Entity\Taxon", mappedBy="parent", cascade={"all"})
 	 * @ORM\OrderBy({"left" = "ASC"})
 	 */
 	private $children;
-
 
 	/**
 	 * Constructor
@@ -130,7 +137,7 @@ class Taxon
 			$child->setTaxonomy($this->taxonomy);
 		}
 
-		return parent::addChild($child);
+		return $this->addChildOverride($child);
 	}
 
 	/**
@@ -143,6 +150,6 @@ class Taxon
 			$child->setTaxonomy(null);
 		}
 
-		parent::removeChild($child);
+		$this->removeChildOverride($child);
 	}
 }
